@@ -1528,95 +1528,61 @@ private struct santanderinfosheet: View {
         NavigationStack {
             List {
                 Section {
-                    HStack {
+                    HStack(spacing: 12) {
                         Image(systemName: file.kind == "directory" ? "folder" : "doc")
                         VStack(alignment: .leading) {
                             Text(name)
-                                .font(.headline)
-                            Text("\(file.size) bytes")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                            if file.kind == "file" {
+                                Text("\(ByteCountFormatter.string(fromByteCount: Int64(file.size), countStyle: .file))")
+                            }
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    .padding(.vertical, 4)
                 }
                 
-                Section(header: Text("File Information")) {
-                    HStack {
-                        Text("UTType")
-                            .foregroundColor(.secondary)
-                        Spacer()
+                Section(header: HeaderLabel(text: "File Information", icon: "info.circle")) {
+                    LabeledContent("UTType") {
                         Text(file.uttype)
-                            .multilineTextAlignment(.trailing)
                     }
-                    HStack {
-                        Text("Creation Date")
-                            .foregroundColor(.secondary)
-                        Spacer()
+                    LabeledContent("Creation Date") {
                         Text(file.created)
-                            .multilineTextAlignment(.trailing)
                     }
-                    HStack {
-                        Text("Last Modified")
-                            .foregroundColor(.secondary)
-                        Spacer()
+                    LabeledContent("Last Modified") {
                         Text(file.modified)
-                            .multilineTextAlignment(.trailing)
                     }
-                    HStack {
-                        Text("Symlink")
-                            .foregroundColor(.secondary)
-                        Spacer()
+                    LabeledContent("Symlink") {
                         Image(systemName: file.isSymlink ? "checkmark" : "xmark")
                     }
                 }
                 
-                Section(header: Text("Permissions")) {
-                    HStack {
-                        Text("POSIX Permissions")
-                            .foregroundColor(.secondary)
-                        Spacer()
+                Section(header: HeaderLabel(text: "Permissions", icon: "shield")) {
+                    LabeledContent("POSIX Permissions") {
                         Text(file.posixPerms)
-                            .font(.system(.body, design: .monospaced))
                     }
-                    HStack {
-                        Text("Owner")
-                            .foregroundColor(.secondary)
-                        Spacer()
+                    LabeledContent("Owner") {
                         Text(file.owner)
                     }
-                    HStack {
-                        Text("Group")
-                            .foregroundColor(.secondary)
-                        Spacer()
+                    LabeledContent("Group") {
                         Text(file.group)
                     }
-                    HStack {
-                        Text("Readable")
-                            .foregroundColor(.secondary)
-                        Spacer()
+                    LabeledContent("Readable") {
                         Image(systemName: file.readable ? "checkmark" : "xmark")
                     }
-                    HStack {
-                        Text("Writable")
-                            .foregroundColor(.secondary)
-                        Spacer()
+                    LabeledContent("Writable") {
                         Image(systemName: file.writable ? "checkmark" : "xmark")
                     }
-                    HStack {
-                        Text("Executable")
-                            .foregroundColor(.secondary)
-                        Spacer()
+                    LabeledContent("Executable") {
                         Image(systemName: file.executable ? "checkmark" : "xmark")
                     }
                 }
             }
             .navigationTitle("File Info")
-            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") {
+                    Button(action: {
                         dismiss()
+                    }) {
+                        Image(systemName: "xmark")
                     }
                 }
             }
