@@ -63,18 +63,40 @@ func fetchkcache() -> Bool {
     }
 
     var buffer = [UInt8](repeating: 0, count: 0x4000)
+    var totalBytes = 0
 
     while true {
-        let n = read(src, &buffer, buffer.count)
+        let n = buffer.withUnsafeMutableBytes { rawBuffer in
+            read(src, rawBuffer.baseAddress!, buffer.count)
+        }
 
-        if n <= 0 {
+        if n < 0 {
+            globallogger.log("(fetchkcache) failed to read kernelcache")
+            return false
+        }
+
+        if n == 0 {
             break
         }
 
-        _ = write(dst, buffer, n)
+        var written = 0
+        while written < n {
+            let w = buffer.withUnsafeBytes { rawBuffer in
+                write(dst, rawBuffer.baseAddress!.advanced(by: written), n - written)
+            }
+
+            if w <= 0 {
+                globallogger.log("(fetchkcache) failed to write kernelcache")
+                return false
+            }
+
+            written += w
+        }
+
+        totalBytes += n
     }
 
-    if !FileManager.default.fileExists(atPath: outpath) {
+    if !FileManager.default.fileExists(atPath: outpath) || totalBytes == 0 {
         globallogger.log("(fetchkcache) kernelcache output missing")
         return false
     } else {
